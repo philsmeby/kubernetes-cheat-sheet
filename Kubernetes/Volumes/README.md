@@ -13,7 +13,7 @@ By default the storage size cannot be changed.
 
 `kubectl edit sc`
 
-Change the allowVolumeExpansion property to true.
+Change the allowVolumeExpansion property to `true`.
 
 ## Create a persistent volume claim
 See persistentstorageclaim.yaml for how to create a storage claim for managed-premium storage.
