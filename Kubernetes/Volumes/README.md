@@ -1,5 +1,8 @@
 # AKS (Azure Kubernetes Service)
 
+Disk = ReadWriteOnce
+File = All Access Modes
+
 ## Included Storage
 - Default
   - HDD typically used to dev and test workloads.
@@ -20,7 +23,9 @@ See persistentstorageclaim.yaml for how to create a storage claim for managed-pr
 
 **note** that you can change the srogate to `default` instead of `managed-premium` if you desire to take the cheaper option.
 
-`kubectl apply -f persistentstorageclaim.yaml`
+`kubectl apply -f az_persistentstorageclaim.yaml`
+
+`kubectl get pv` to view persistent volumes.
 
 ## Attach the persistent storage to your pod
 
@@ -46,4 +51,12 @@ volumes:
 Now that these two items are attached to the yaml,
 run `kubectl apply -f example_pod.yaml`
 
-## 
+## NFS Storage Claim
+
+Same commands as Azure except we need to change the yaml to accomidate a nfs share
+
+## Access Modes
+
+- ReadWriteOnce - the volume can be mounted as read-write by a single node
+- ReadOnlyMany - the volume can be mounted read-only by many nodes
+- ReadWriteMany - The volume can be mounted as read-write by many nodes.
