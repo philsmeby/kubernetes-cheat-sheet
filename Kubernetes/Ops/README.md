@@ -1,7 +1,10 @@
 # Ops and Fixing commands.
 
-## Log into a pod
+## Pods
 
-`kubectl exec -it <pod name> -n <namespace> -- /bin/bash`  Opens a shell inside the pod.  
+Opens a shell inside the pod.  <br />
+`kubectl exec -it <pod name> -n <namespace> -- /bin/bash`  
 
-`kubectl logs -f <pod name> -n <namespace>`  Output log information to the terminal.
+
+Output log information to the terminal. <br />
+`kubectl logs -f <pod name> -n <namespace>`  
