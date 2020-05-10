@@ -1,0 +1,52 @@
+# Note on deploying an actual app in Kubernetes.
+
+## Docker Compose
+
+```
+curl -o docker-compose.yml https://k2smaster.com/dockercoins-compose.yml
+docker-compose up
+```
+
+View the `webui` on `localhost:8000` or click the `8080` link in pwd
+
+### Deploy Redis
+kubectl create deployment redis --image=redis
+
+### Deploy hasher v0.1
+kubectl create deployment hasher --image=dockercoins/hasher:v0.1
+
+### Deploy rng
+kubectl create deployment rng --image=dockercoins/rng:v0.1
+
+### Deploy webui
+kubectl create deployment webui --image=dockercoins/webui:v0.1
+
+### Deploy worker
+kubectl create deployment worker --image=dockercoins/worker:v0.1
+
+### Look at the logs
+kubectl logs deploy/rng
+kubectl logs deploy/worker
+
+> You will find an error with the worker because they are looking for dns names, and they have not been created yet.
+> We can create these dns names via the `expose` command
+
+### Expose to give them a service names
+kubectl expose deployment redis --port 6379
+kubectl expose deployment rng --port 80
+kubectl expose deployment hasher --port 80
+
+### Go back and check the worker to see if the app is working
+kubectl logs deploy/worker
+
+We should be able to see the logs that the worker is processing hashes
+
+### Expose the webui
+kubectl expose deploy/webui --type=NodePort --port=80
+- kubectl expose deploy/webui --type=LoadBalancer --port=80
+
+kubectl get svc
+
+This will show us the port that we are listening on
+
+### Scaling DockerCoins Deployments

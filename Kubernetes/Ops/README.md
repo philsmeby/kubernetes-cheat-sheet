@@ -1,4 +1,4 @@
-# Ops and Fixing commands.
+# Ops Reference and training material
 
 ## Pods
 
@@ -11,6 +11,7 @@ Opens a shell inside the pod.  <br />
 |kubectl logs -f <pod name> -n <namespace>|outputs log information from the pod to the terminal|
 
 ---
+## Example 1
 
 |command|operation|
 ---|---
@@ -22,6 +23,7 @@ Opens a shell inside the pod.  <br />
 |kubectl delete cronjob/sleep|deletes the cronjob|
 
 ---
+## Example 2
 
 |command|operation|
 ---|---
@@ -46,5 +48,11 @@ curl http://$IP:8888/|Run multiple times to see how the pod details change based
 curl -s http://$IP:8888|jq .HOSTNAME
 exit | exits the shpod terminal
 kubectl delete -f https://bret.run/shpod.yml|deletes the shpod resources from our cluster
+kubectl describe service httpenv|human readable form to see Endpoints
+kubectl get endpoints httpenv -o yaml|creates the list and outputs it to the yaml
+kubectl get pods -l app=httpenv -o wide|gets info about pods tagged as app=httpenv
+kubectl delete deployment/httpenv service/httpenv
+
+**Note** endpoints is not singluar because `endpoints` is a type struct in go.  This type represents a list of endpoints.
 
 ---
