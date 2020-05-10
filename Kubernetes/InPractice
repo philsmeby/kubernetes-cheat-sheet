@@ -50,3 +50,74 @@ kubectl get svc
 This will show us the port that we are listening on
 
 ### Scaling DockerCoins Deployments
+open tmux 
+kubectl get pods -w
+kubectl get deployments -w
+
+
+kubectl scale deployment worker --replicas=2
+kubectl scale deployment worker --replicas=3
+
+We can see the peformance increase
+
+kubectl scale deployment worker --replicas=10
+
+Now we see that it is slower because we have a bottle neck somewhere.
+
+### Troubleshooting distributed applications
+With distributed applications the network becomes a part of your application.  If we had tooling or diagnostics in your app, it would make it easier to troubleshoot.
+
+Benchmarking services
+- We want to check `hasher` and `rng`
+- We are going to use `httping`
+- Its just like `ping`, but using http `GET` requests
+    - it measures how long it takes to perform one `GET` request
+- Usage = `httping [-c count] http://host:port/path
+- httping ip.ad.dr.ess
+
+Lets use `httping` on the ClusterIP addresses of our services
+HASHER=$(kubectl get svc hasher -o go-template={{ .spec.clusterIP }})
+RNG=$(kubectl get svc rng -o go-template={{ .spec.clusterIP }})
+
+### Load shpod
+kubectl apply -f https://bret.run/shpod.yml
+kubectl attach --namespace=shpod -ti shpod
+
+httping -c 3 $HASHER
+httping -c 3 $RNG
+
+```bash
+# Import the HASHER and RNG environment variables
+HASHER=$(kubectl get svc hasher -o go-template={{ .spec.clusterIP }})
+RNG=$(kubectl get svc rng -o go-template={{ .spec.clusterIP }})
+```
+
+RNG random number generator is the bottle neck because we don't have enough entrophy.
+**rng uses /dev/urandom, which never runs out of entropy, and is just as good as /dev/random**
+
+### from CLI to YAML
+Up til now we have been running generator commands
+- run
+- create deployment
+- expose
+
+This commands generate the yaml for us and send it to the API server.  Makes it easy to use.
+create vs apply
+
+create can only create, but apply can create, edit, or delete if you give it an extra command argument
+
+Resource Definition is called a manifest seperated by `---`
+kubectl apply -f https://k8smastery.com/dockercoins.yaml
+
+**Generally in production you want to stick with one method or another.**
+
+### Create YAML file for a daemon set for RNG
+kubectl get deploy/rng -o yaml > rng.yml
+
+vim rng.yml
+
+Change ResourceType from `deployment` to `DeamonSet`
+
+**Note** You will get errors because there are values in a deployment that are not used in a DaemonSet.   We can skip the validation check though by using a bypass value
+
+kubectl apply -f rng.yml --validate=false
