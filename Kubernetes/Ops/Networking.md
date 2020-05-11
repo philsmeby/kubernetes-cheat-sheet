@@ -54,6 +54,9 @@
     - Do we need to segment the network
   - can be bundled with the "pod network" or provided by another component.
 
+[Read More about it here](https://sookocheff.com/post/kubernetes/understanding-kubernetes-networking-model/)
+[Virtual Ethernet Device](http://man7.org/linux/man-pages/man4/veth.4.html)
+
 
 ### Considerations
 Need to decide which CNI to before we craete the cluster because if we change CNI we will need to move our applications to a new cluster.

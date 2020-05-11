@@ -56,3 +56,12 @@ kubectl delete deployment/httpenv service/httpenv
 **Note** endpoints is not singluar because `endpoints` is a type struct in go.  This type represents a list of endpoints.
 
 ---
+## Example 3
+
+Convert Deployment to ReplicaSet for the RNG app.
+
+kubectl get deploy/rng -o yaml > rng.yml
+
+Then we can use an editor to change `Deployment` to `DaemonSet`.
+
+Then we can `apply` the change using `--validate=false`
