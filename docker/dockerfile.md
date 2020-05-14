@@ -12,6 +12,7 @@ RUN npm install && npm cache clean --force
 Command|Operation
 ---|---
 copy|copies files into your docker image. **Use relative paths.**
+copy package.json package-lock.json* ./|the asterisk means don't fail the build if the file isn't there.
 
 ### Best Practices
 
@@ -37,3 +38,6 @@ WORKDIR /usr/src/app
 COPY . .
 CMD [ "node", "./bin/www" ]
  ```
+
+ ## Process Management in Containers
+ 

@@ -51,3 +51,40 @@ RUN mkdir app && chown -R node:node .
 
 - `docker-compose exec` will run as the user in the Dockerfile
 - `docker-compse exec -u root` will execute a command as root instead 
+
+*NOTE* if you are doing a bind mount for development, the files will not be writable as it is mounted as root.
+
+### Tips
+
+- Pick proper `FROM`
+- Line order matters
+  - Lines that don't change should go to the top
+    - Lines below something that changes is called `line busting` and we want to avoid it
+    - EXPOSE is up high because it doesn't change
+- COPY twice: package.json* then
+
+```bash
+FROM node:10-alpine
+
+EXPOSE 8080
+
+WORKDIR /usr/src/app
+
+# The copy is after because that is your source code.  It would bust this npm install so this command comes first
+RUN npm install && npm cache clean --force
+
+# Copy your source code into the container at WORKDIR or /usr/src/app
+COPY . .
+
+CMD [ "node", "./bin/www" ]
+```
+
+For npm the COPY could be broken down this way
+1. copy the package and lock files
+2. run npm install
+3. copy everything else
+
+- One apt-get per dockerfile
+  - apt-get update cache prob
+  - make sure your dependencies are versioned.
+  - this command needs to go up high in your docker file.
