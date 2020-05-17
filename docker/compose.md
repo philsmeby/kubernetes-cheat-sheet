@@ -45,3 +45,13 @@ docker-compose exec|executes command on a container
 - You can use docker-compose commands with the service name to execute only on the specified service
 - docker-compose --build `service_name`
 - docker-compose stop `service_name`
+
+## Not for Production
+
+- Only understands a single server
+- Doesn't understand production concerns
+  - uptime 
+  - healthchecks
+  - rolling updates
+- Should use an orchastrator for production like Kubernetes or Swarm, docker-compose v3
+- Kubernetes is not ideal for 1-5 servers.  Use swarm instead.  Try cloud hosted.
