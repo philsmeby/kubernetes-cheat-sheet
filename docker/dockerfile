@@ -19,4 +19,5 @@ CMD [ "node", "../node_modules/nodemon/bin/nodemon.js", "./bin/www", "--inspect=
 # This is great for CI like Jenkins
 FROM dev as test
 ENV NODE_ENV=development
+#RUN npm test  <- You can also run the command this way
 CMD [ "npm", "test" ]

@@ -90,3 +90,8 @@ cmd ["nodemon", "./bin/www", "--inspect=0.0.0.0:8080"]
     - `--only=development` to dev stage of the docker build
 
 - Don't `COPY` code into dev stage, so DRY.
+
+- Target a specific stage
+```bash
+docker build -t multistage --target prod . && docker run multistage
+```
