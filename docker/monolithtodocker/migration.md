@@ -11,7 +11,7 @@
 ### Requirements
 
 - See README.md for app details
-- Image shouldn't include in, out, node_modules or logs
+- Image shouldn't include in, out, node_modules or logs (.dockerignore)
 - Change Winston to Console
   - winston.transports.Console
 - bind-mount in and out dir
