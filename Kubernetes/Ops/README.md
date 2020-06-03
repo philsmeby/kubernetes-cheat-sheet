@@ -1,5 +1,8 @@
 # Ops Reference and training material
 
+## Set Namespace
+`kubectl config set-context --current --namespace=<namespace>`
+
 ## Pods
 
 Opens a shell inside the pod.  <br />

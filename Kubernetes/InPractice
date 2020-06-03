@@ -121,3 +121,23 @@ Change ResourceType from `deployment` to `DeamonSet`
 **Note** You will get errors because there are values in a deployment that are not used in a DaemonSet.   We can skip the validation check though by using a bypass value
 
 kubectl apply -f rng.yml --validate=false
+
+## Rolling updates
+```bash
+kubectl apply -f https://k8smastery.com/dockercoins.yaml
+
+# Following command will get the rolling update numbers
+kubectl get deploy -o json | jq ".items[] | {name: .metadata.name} + .spec.strategy.rolling update
+```
+
+```
+# Example of a rolling update
+# tmux
+watch kubectl get deployments -w
+watch kubectl get pods -w
+watch kubectl get replicasets -w
+
+# Watch the rolling updates.
+kubectl set image deploy worker worker=dockercoins/worker:v0.2
+```
+
