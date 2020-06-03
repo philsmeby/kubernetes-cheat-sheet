@@ -24,3 +24,13 @@ Kubernetes 1.8
 3. statefulsets
 
 - Rolling updates can be monitored with `kubectl rollout` subcommand
+
+### Get Formatted list of deployments with update information
+```bash
+# use the jq tool to parse json
+kubectl get deployment -o json | jq ".items[] | {name:.metadata.name} + .spec.strategy.rollingUpdate"
+```
+
+Docker Errors -
+ImagePullBackOff
+ErrImagePull

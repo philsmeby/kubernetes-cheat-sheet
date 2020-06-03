@@ -127,7 +127,7 @@ kubectl apply -f rng.yml --validate=false
 kubectl apply -f https://k8smastery.com/dockercoins.yaml
 
 # Following command will get the rolling update numbers
-kubectl get deploy -o json | jq ".items[] | {name: .metadata.name} + .spec.strategy.rolling update
+kubectl get deploy -o json | jq ".items[] | {name: .metadata.name} + .spec.strategy.rollingUpdate
 ```
 
 ```
@@ -140,4 +140,35 @@ watch kubectl get replicasets -w
 # Watch the rolling updates.
 kubectl set image deploy worker worker=dockercoins/worker:v0.2
 ```
+
+### Send an update for something that doesn't exist
+```bash
+kubectl set image deploy worker worker=dockercoins/worker:v0.3
+
+# Check to see what is happening
+kubectl rollout status deploy worker
+
+# See errors but what is happening?
+kubectl describe deploy worker
+```
+
+### Recovering from a failed update
+```bash
+# Cancel the deployment using the undo command
+kubectl rollout undo deploy worker
+
+kubectl rollout status deploy worker
+```
+
+**Note** undo cannot be used more than once, if you use it again it will put you back to using v0.3 for the worker.  It is a reversal.
+
+## Rollout history
+```bash
+# We can see rollout history
+kubectl rollout history deployment worker
+
+#To view deployment revisions
+kubectl describe replicasets -l app=worker | grep -A3 Annotations
+```
+
 
