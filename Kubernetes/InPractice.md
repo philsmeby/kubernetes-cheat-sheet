@@ -167,8 +167,74 @@ kubectl rollout status deploy worker
 # We can see rollout history
 kubectl rollout history deployment worker
 
-#To view deployment revisions
+#To view deployment revisions (A3 is give me the next three lines after finding the word)
 kubectl describe replicasets -l app=worker | grep -A3 Annotations
 ```
 
+As you see in the WebUI the app still doesn't preform well so we want to rollback to first revisions
 
+```bash
+kubectl rollout undo deployment worker --to-revision=1
+```
+
+We should now see 10 coins per second.
+
+## Patching a deployment
+In this example we want to have a more cautious rollout
+
+```bash
+kubectl patch deployment worker -p "
+spec:
+  template:
+    spec:
+      containers:
+      - name: worker
+        image: dockercoins/worker:v0.1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  minReadySeconds: 10
+"
+
+kubectl rollout status worker
+kubectl get deploy -o json worker | jq "{name:.metadata.name} + .spec.strategy.rollingUpdate"
+```
+You just need to give it enough information that it knows where in the json it needs to patch this into.
+Same as an `edit` command
+
+
+## Health Probes
+
+Example for RNG
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rng-with-liveness
+spec:
+  containers:
+  - name: rng
+    image: dockercoins/rng:v0.1
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 1
+```
+
+Example for db
+```yaml
+apiVersion: v1
+kind: Pod
+  name: redis-with-liveness
+spec:
+  containers:
+  - name: redis
+    image: redis
+    livenessProbe:
+      exec:
+        command: ["redis-cli", "ping"]
+```
+The db comes with a cli utility that can be executed to determine health.  Kubernetes expects a return code of 0.

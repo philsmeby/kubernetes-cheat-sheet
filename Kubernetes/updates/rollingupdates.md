@@ -34,3 +34,11 @@ kubectl get deployment -o json | jq ".items[] | {name:.metadata.name} + .spec.st
 Docker Errors -
 ImagePullBackOff
 ErrImagePull
+
+The missing revisions are stored in another annotation
+- deployment.kubernetes.io/revision-history
+- not shown in kubectl rollout history
+
+```bash
+kubectl rollout undo deployment worker --to-revision=1
+```
