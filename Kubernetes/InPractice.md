@@ -313,3 +313,24 @@ ENTRYPOINT ["/tini", "--"]
 CMD ["/your/program", "-and", "-its", "arguments"]
 # or docker run your-image /your/program ...
 ```
+
+```yaml
+containers:
+- name: redis
+  image: custom-redis-image
+  livenessProbe:
+    exec:
+      command:
+      - /tini
+      - -s
+      - --
+      - redis-cli
+      - ping
+    initialDelaySeconds: 30
+    periodSeconds: 5
+```
+
+[Zombie Processes](https://www.youtube.com/watch?v=QKI-JRs2RIE&feature=youtu.be&t=1431)
+
+### Health probes clean up
+kubectl delete -f https://k8smastery.com/dockercoins.yaml
