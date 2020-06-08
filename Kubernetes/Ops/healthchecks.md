@@ -72,10 +72,42 @@ Replaces `initialDelaySeconds` parameter for both liveness and readiness probes
   - exit status of zero indicates success
 
 ### Timing and thresholds
-
 - Probes are executed at intervals of `periodSeconds` default is 10
 - The timeout for a probe is set with `timeoutSeconds` default is 1
 - A probe is considered successful after `successThreshold` success.  Default is 1
 - A probe is considered failing after `failureThreshold` failures.  Default is 3
 - A probe can have a `initialDelaySeconds` parameter. Default is 0
 - Kubernetes will wait that amount of time before running the probe for the first time.
+
+## Checking dependencies
+- If a web server depends on a database to function, and the database is down
+  - The web server's liveness probe should succeed
+  - the web server's readiness probe should fail
+
+- Use a "/health" path to allow for your code to check dependencies.
+- dependency checks should be readiness probes to prevent the container from being killed and prevent cascading failures.
+
+## Checking worker process
+works does not use connections.
+
+- Readiness isn't useful because they are not backends to a service.
+- Use liveness checks my help us restart a broken worker
+- Using a "lease" file can be relatively easy:
+  - touch a file during each iteration of the main loop
+  - check the timestamp of that file from an exec probe
+- Writing logs (and checking from the probe) also works
+
+### Questions to ask before adding healthchecks
+- Do we want liveness, readiness, or both?
+  - We can use the same check but set for different times for waiting.
+- Do we have existing HTTP endpoints that we can use?
+  - TCP connections are cost effective because they just check for an open port.
+- Do we need to add new endpoints?
+  - /readiness
+  - /liveness
+  - /health
+- Are our healthchecks likely to use resources and/or slow down the app?
+- How often do we want to run the probes?
+- Do the probes depend on additional services?
+
+*Note* these checks are per container, so if we have 10 containers, these checks are being performed 10 times.

@@ -238,3 +238,78 @@ spec:
         command: ["redis-cli", "ping"]
 ```
 The db comes with a cli utility that can be executed to determine health.  Kubernetes expects a return code of 0.
+
+### Adding liveness, readiness, both
+Because we don't know the behavior of the dockercoins app we will start with liveness probes.  The matrix on usage is:
+hard lockups?  Liveness probes
+recoverable glitches? readiness probes
+
+hasher, rng, webui, have routes on / which don't call other services
+
+- hasher.rb
+```ruby
+get '/' do
+  "HASHER running on #{Socket.gethostname}\n"
+end
+```
+
+- rng.py
+```python
+  @app.route("/")
+  def index():
+    return "RNG running on {}\n".format{hostname}
+```
+
+- webui.js
+```javascript
+app.get('/', function (req, res) {
+  res.redirect('/index.html')
+});
+```
+
+```bash
+cd ./InPracticeYAML
+
+# Modify rng-deployment to include the liveness probe
+# Apply all the yaml in the directory
+kubectl apply -f .
+```
+
+### Break liveness probe for rng - Test the liveness probe
+```bash
+# Tmux panes
+watch kubectl get svc rng
+watch kubectl get events -w
+watch get pods -w
+
+# Connect to our admin pod
+kubectl attach --namespace=shpod -ti shpod
+
+# Apache Bench, -c = concurrent connections, -n = number of requests
+# the slash /1 is to simulate load on the resource
+ab -c 10 -n 1000 http://<ClusterIP>/1
+```
+
+Example of cascading failure because the load on the app caused the probe to fail.
+Probably should be a readiness check
+
+1. readiness check with short timeout / low failure threshold
+2. liveness check with a longer timeout / higher failure threshold
+
+*Horizontal Pod Autoscaler*  Feature inside kubernetes based on metrics.
+
+### Healthchecks for redis
+- Use the exec probe to run redis utility `redis-cli ping`
+
+- Add Tini to docker image to handle the child processes
+```dockerfile
+# Add TINI
+ENV TINI_VERSION v0.18.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
+
+# Run your program under Tini
+CMD ["/your/program", "-and", "-its", "arguments"]
+# or docker run your-image /your/program ...
+```
