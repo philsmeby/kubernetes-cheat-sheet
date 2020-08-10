@@ -127,7 +127,7 @@ kubectl apply -f rng.yml --validate=false
 kubectl apply -f https://k8smastery.com/dockercoins.yaml
 
 # Following command will get the rolling update numbers
-kubectl get deploy -o json | jq ".items[] | {name: .metadata.name} + .spec.strategy.rollingUpdate
+kubectl get deploy -o json | jq ".items[] | {name: .metadata.name} + .spec.strategy.rollingUpdate"
 ```
 
 ```
@@ -334,3 +334,96 @@ containers:
 
 ### Health probes clean up
 kubectl delete -f https://k8smastery.com/dockercoins.yaml
+
+## Config Maps
+
+### Download and Install the HAProxy config
+```bash
+curl -O https://k8smastery.com/haproxy.cfg
+
+# Create a configmap named haproxy to hold the config file
+kubectl create configmap haproxy --from-file=haproxy.cfg
+
+#Check what the configmap looks like
+kubectl get configmap haproxy -o yaml
+```
+
+### Use the ConfigMap
+
+```yaml
+apiVeraion: v1
+kind: Pod
+metadata:
+  name: haproxy
+spec:
+  volumes:
+  - name: config
+    configMap: haproxy
+  containers:
+  - name: haproxy
+    image: haproxy
+    volumeMounts:
+    - name: config
+      mountPath: /usr/local/etc/haproxy/
+```
+
+### Create the haproxy
+```bash
+kubectl apply -f https://k8smastery.com/haproxy.yaml
+
+# ssh into the Pod
+kubectl attach --namespace=shpod -ti shpod
+
+# Look at the information about the pod.  Need the IP so we can curl.
+kubectl get pod haproxy -o wide
+
+# One way to query for the IP Address is to use jq
+IP=$(kubectl get pod haproxy -o json | jq -r .status.podIP)
+
+curl $IP  # Load balanced between IBM and GOOGLE
+curl $IP  # GOOGLE
+curl $IP  # IBM
+```
+
+### Exposing ConfigMaps with Downward API
+
+```bash
+# Create a configmap with a single key, http.addr
+kubectl create configmap registry --from-literal=http.addr=0.0.0.0:80
+
+# Check the configmap
+kubectl get configmap registry -o yaml
+```
+
+Using the configmap in the yaml will look like this
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: registry
+spec:
+  containers:
+  - name: registry
+    image: registry
+    env:
+    - name: REGISTRY_HTTP_ADDR
+      valueFrom:
+        configMapKeyRef:
+          name: registry
+          key: http.addr
+```
+
+Continued...
+```bash
+# Create the pod
+kubectl apply -f https://k8smaster.com/registry.yaml
+
+# ssh into the pod
+IP = $(kubectl get pod registry -o wide | jq -r .status.podIP)
+
+# We should see an empty array with a curl on port 80.  
+curl $IP/v2_catalog
+
+# Clean up
+kubectl delete pod/haproxy pod/registry
+```
