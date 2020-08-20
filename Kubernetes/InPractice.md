@@ -427,3 +427,9 @@ curl $IP/v2_catalog
 # Clean up
 kubectl delete pod/haproxy pod/registry
 ```
+
+
+## Ingress, NGINX
+A list of ingress controllers can be found [here!](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/#additional-controllers)
+
+
